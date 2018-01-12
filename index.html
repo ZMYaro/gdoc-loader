@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style type="text/css">
+			fieldset:disabled {
+				opacity: 0.5;
+			}
+			label[for="load-id-input"] {
+				margin: 1em;
+				display: flex;
+				flex-wrap: wrap;
+			}
+			#load-id-input {
+				flex-grow: 1;
+			}
+		</style>
+		
+		<script type="text/javascript" src="loader.js"></script>
+		<script async defer src="https://apis.google.com/js/api.js"
+			onload="this.onload=function(){};handleClientLoad()"
+			onreadystatechange="if (this.readyState === 'complete') this.onload()">
+		</script>
+	</head>
+	<body>
+		<fieldset id="auth-fields" disabled="disabled">
+			<legend>Authorization</legend>
+			<ol>
+				<li>
+					You must have the file you are loading in your Google Drive.
+				</li>
+				<li>
+					You must authorize the Google Drive API.
+				</li>
+			</ol>
+			<button id="auth-btn">Authorize</button>
+		</fieldset>
+		<form id="load-form">
+			<fieldset id="load-fields" disabled="disabled">
+				<legend>GDoc Loading</legend>
+				<label for="load-id-input">
+					<span>Doc ID:&nbsp;</span>
+					<input type="text" id="load-id-input" />
+				</label>
+				<button type="submit">Load</button>
+			</fieldset>
+		</form>
+	</body>
+</html>
