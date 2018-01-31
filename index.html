@@ -34,12 +34,22 @@
 			</ol>
 			<button id="auth-btn">Authorize</button>
 		</fieldset>
-		<form id="load-form">
-			<fieldset id="load-fields" disabled="disabled">
+		<form id="doc-form">
+			<fieldset id="doc-fields" disabled="disabled">
 				<legend>GDoc Loading</legend>
-				<label for="load-id-input">
+				<label for="doc-id-input">
 					<span>Doc ID:&nbsp;</span>
-					<input type="text" id="load-id-input" />
+					<input type="text" id="doc-id-input" />
+				</label>
+				<button type="submit">Load</button>
+			</fieldset>
+		</form>
+		<form id="folder-form">
+			<fieldset id="folder-fields" disabled="disabled">
+				<legend>GDrive Folder Loading</legend>
+				<label for="folder-id-input">
+					<span>Folder ID:&nbsp;</span>
+					<input type="text" id="folder-id-input" />
 				</label>
 				<button type="submit">Load</button>
 			</fieldset>

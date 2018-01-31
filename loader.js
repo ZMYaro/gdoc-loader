@@ -7,29 +7,41 @@ const CLIENT_ID = 'YOUR CLIENT ID HERE',
 	/** {Array<String>} URL for the Google Drive v3 API discovery docs */
 	DRIVE_API_DISCOVERY = ['https://www.googleapis.com/discovery/v1/apis/drive/v2/rest'],
 	/** {String} General Google Drive API scope URL */
-	SCOPE = 'https://www.googleapis.com/auth/drive';
+	SCOPE = 'https://www.googleapis.com/auth/drive',
+	/** {String} The MIME type for a Google Doc */
+	DOC_MIME_TYPE = 'application/vnd.google-apps.document',
+	/** {Number} The maximum number of docs to list in a folder */
+	MAX_FILES_PER_FOLDER = 1000;
 
 var authFields,
-	loadForm,
-	loadFields,
-	docIdInput;
+	docFields,
+	folderFields,
+	docIdInput,
+	folderIdInput;
 
 /**
  * Get inputs and set up event listeners.
  */
 window.addEventListener('load', function () {
 	authFields = document.getElementById('auth-fields');
-	loadFields = document.getElementById('load-fields');
-	docIdInput = document.getElementById('load-id-input');
+	docFields = document.getElementById('doc-fields');
+	folderFields = document.getElementById('folder-fields');
+	docIdInput = document.getElementById('doc-id-input');
+	folderIdInput = document.getElementById('folder-id-input');
 	
 	document.getElementById('auth-btn').onclick = function () {
 		gapi.auth2.getAuthInstance().signIn();
 	};
 	
-	document.getElementById('load-form').onsubmit = function (e) {
+	document.getElementById('doc-form').onsubmit = function (e) {
 		e.preventDefault();
 		
 		loadDoc(docIdInput.value);
+	};
+	document.getElementById('folder-form').onsubmit = function (e) {
+		e.preventDefault();
+		
+		loadFolder(folderIdInput.value);
 	};
 }, false);
 
@@ -65,19 +77,47 @@ async function initAPI() {
  */
 function handleAuthResult(isSignedIn) {
 	if (!isSignedIn) {
-		loadFields.disabled = true;
+		docFields.disabled = true;
+		folderFields.disabled = true;
 		authFields.disabled = false;
 		return;
 	}
 	
 	authFields.disabled = true;
-	loadFields.disabled = false;
+	docFields.disabled = false;
+	folderFields.disabled = false;
+}
+
+/**
+ * Load all the Google Docs in a folder.
+ * @param {String} folderId - The ID of the Google Drive folder to load from
+ * @returns {Promise} Resolves when the function is done
+ */
+async function loadFolder(folderId) {
+	try {
+		var listRes = await(gapi.client.drive.files.list({
+			pageSize: MAX_FILES_PER_FOLDER,
+			q: '\'' + folderId + '\' in parents'
+		}));
+	} catch (err) {
+		alert('Something went wrong.  Are you sure that is a valid ID for a folder in your Google Drive?');
+		return;
+	}
+	
+	var docs = listRes.result.items;
+	for (var doc of docs) {
+		if (doc.mimeType !== DOC_MIME_TYPE) {
+			continue;
+		}
+		
+		await(loadDoc(doc.id));
+	}
 }
 
 /**
  * Load a Google Doc as HTML.
  * @param {String} docId - The ID of the Google Doc to load
- * @param {Promise} Resolves when the function is done
+ * @returns {Promise} Resolves when the function is done
  */
 async function loadDoc(docId) {
 	try {
@@ -91,9 +131,17 @@ async function loadDoc(docId) {
 		return;
 	}
 	
+	handleHTML(exportRes.body);
+}
+
+/**
+ * Do something with the doc HTML.
+ * @param {String} html - The doc HTML
+ */
+function handleHTML(html) {
 	// For now, just open a window with the exported HTML.
 	var outputWin = window.open('', '_blank', 'menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes');
-	outputWin.document.documentElement.innerHTML = exportRes.body;
+	outputWin.document.documentElement.innerHTML = html;
 	
 	///////////////////////////////////////////////
 	//                                           //
